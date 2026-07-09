@@ -4,11 +4,11 @@ import { PostListInfo } from "../store/postListStore";
 
 function CreatePost() {
   const {addPost}=useContext(PostListInfo);
-  const userIdElement=useRef();
-  const TitleElement=useRef();
-  const ContentElement=useRef();
-  const ReactionsElement=useRef();
-  const TagsElement=useRef();
+  let userIdElement=useRef();
+  let TitleElement=useRef();
+  let ContentElement=useRef();
+  let ReactionsElement=useRef();
+  let TagsElement=useRef();
 
   const handleSubmit=(event)=>{
     event.preventDefault();
@@ -18,11 +18,11 @@ function CreatePost() {
     const Reactions=ReactionsElement.current.value;
     const TagsString=TagsElement.current.value.split(/\s+/);
     addPost(userId,Title,Content,Reactions,TagsString);
-    //  userIdElement="";
-    //  TitleElement=""
-    //  ContentElement=""
-    //  ReactionsElement=""
-    //  TagsElement=[]
+    userIdElement.current.value="";
+    TitleElement.current.value=""
+    ContentElement.current.value=""
+    ReactionsElement.current.value=""
+    TagsElement.current.value=""
   }
 
   return <form onSubmit={handleSubmit}>

@@ -1,3 +1,4 @@
+import { act } from "react";
 import { createContext, useReducer } from "react";
 
 export const PostListInfo = createContext({
@@ -14,14 +15,7 @@ const postListReducer = (currPostList, action) => {
         })
     }
     else if (action.type === "ADD_POST") {
-        newPostList = [...currPostList, {
-            id: action.payload.userId,
-            title: action.payload.Title,
-            body: action.payload.Content,
-            reaction: action.payload.Reactions,
-            tags: action.payload.TagsString,
-            userID: action.payload.userId
-        }]
+        newPostList = [action.payload,...currPostList]
     }
     return newPostList;
 };
@@ -33,12 +27,12 @@ const PostListInfoProvider = ({ children }) => {
         dispatchPostList({
             type: "ADD_POST",
             payload: {
-                id,
-                userId,
-                Title,
-                Content,
-                Reactions,
-                TagsString
+                id:Date.now(),
+                title:Title,
+                body:Content,
+                reaction:Reactions,
+                tags:TagsString,
+                userID:userId
             }
         });
     };
