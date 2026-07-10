@@ -1,11 +1,16 @@
-import { act } from "react";
+import { act, useEffect, useState } from "react";
 import { createContext, useReducer } from "react";
 
 export const PostListInfo = createContext({
     postList: [],
+    fetching: "",
     addPost: () => { },
-    deletePost: () => { }
+    deletePost: () => { },
+    addInitialPost: () => { }
 });
+
+
+
 
 const postListReducer = (currPostList, action) => {
     let newPostList = currPostList;
@@ -14,25 +19,52 @@ const postListReducer = (currPostList, action) => {
             return post.id !== action.payload.postID;
         })
     }
+    else if (action.type === "ADD_INITIAL_POST") {
+        newPostList = action.payload.postsArray;
+    }
     else if (action.type === "ADD_POST") {
-        newPostList = [action.payload,...currPostList]
+        newPostList = [action.payload, ...currPostList]
     }
     return newPostList;
 };
 
 const PostListInfoProvider = ({ children }) => {
-    const [postList, dispatchPostList] = useReducer(postListReducer, DEFAULT_POSTLIST);
+    const [postList, dispatchPostList] = useReducer(postListReducer, []);
+    const [fetching, setFetching] = useState(false);
+    useEffect(() => {
+        const controller = new AbortController();
+        const signal = controller.signal;
+        setFetching(true);
+        fetch('https://dummyjson.com/posts', { signal })
+            .then(res => res.json())
+            .then((obj) => {
+                addInitialPost(obj.posts);
+                setFetching(false);
+            });
+        return () => {
+            controller.abort();
+        };
+    }, []);
+
 
     const addPost = (userId, Title, Content, Reactions, TagsString) => {
         dispatchPostList({
             type: "ADD_POST",
             payload: {
-                id:Date.now(),
-                title:Title,
-                body:Content,
-                reaction:Reactions,
-                tags:TagsString,
-                userID:userId
+                id: Date.now(),
+                title: Title,
+                body: Content,
+                reaction: Reactions,
+                tags: TagsString,
+                userId: userId
+            }
+        });
+    };
+    const addInitialPost = (postsArray) => {
+        dispatchPostList({
+            type: "ADD_INITIAL_POST",
+            payload: {
+                postsArray: postsArray
             }
         });
     };
@@ -47,26 +79,12 @@ const PostListInfoProvider = ({ children }) => {
     };
     return <PostListInfo.Provider value={{
         postList: postList,
+        fetching: fetching,
         addPost: addPost,
-        deletePost: deletePost
+        deletePost: deletePost,
+        addInitialPost: addInitialPost
     }}>{children}</PostListInfo.Provider>
 };
 
-const DEFAULT_POSTLIST = [{
-    id: "1",
-    title: "Going To College",
-    body: "hello dosto mai apne college jaa raha hu,mera college mere ghar se boht door hai.",
-    reaction: 2,
-    tags: ["travelling", "study"],
-    userID: "user-9"
-},
-{
-    id: "2",
-    title: "Going To Pune",
-    body: "chalo bhailog mai pune ja rha huu ghumne ke liye kon kon ana chahta hai batao jaldi .",
-    reaction: 4,
-    tags: ["travelling", "Food"],
-    userID: "user-10"
-}
-]
+
 export default PostListInfoProvider;
